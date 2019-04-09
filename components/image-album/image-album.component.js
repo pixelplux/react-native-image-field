@@ -12,10 +12,10 @@ import {
 import { styles } from './image-album.style';
 
 import {
+  ValidationTypes,
   multiSourceImagePicker,
   photoSourceActionSheet
-} from '../../user/user.actions';
-import { ValidationTypes } from '../../services/shared';
+} from '../../services/shared';
 import { ProgressbarComponent } from '../progressbar/progressbar.component';
 
 export class ImageAlbumComponent extends Component {

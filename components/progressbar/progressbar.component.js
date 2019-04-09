@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Dimensions } from 'react-native';
 import * as Progress from 'react-native-progress';
-import { colors } from '@product/theme';
-const width = Dimensions.get('window').width;
+import { colors } from '../../services/shared';
+
+const { width } = Dimensions.get('window');
 
 export class ProgressbarComponent extends React.Component {
   render() {

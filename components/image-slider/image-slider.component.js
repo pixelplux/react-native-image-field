@@ -7,17 +7,8 @@ import {
 } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { styles } from './image-slider.style';
-import { colors } from '@product/theme';
+import { colors } from '../../services/shared';
 
-/**
- * For smaller margin or different components, get the width like this
- * 
- * onLayout = event => {
-    if (this.state.dimensions) return;
-    let { width, height } = event.nativeEvent.layout;
-    this.setState({ dimensions: { width, height } });
-  };
- */
 const initScreenDimensions = Dimensions.get('window');
 const width = initScreenDimensions.width;
 export class ImageSlider extends Component {
@@ -39,7 +30,10 @@ export class ImageSlider extends Component {
         key={index}
         onPress={() => this._onImagesPressed(index)}
       >
-        <Image style={{ width: null, height: Dimensions.get('window').width }} source={{ uri: item }} />
+        <Image
+          style={{ width: null, height: Dimensions.get('window').width }}
+          source={{ uri: item }}
+        />
       </TouchableWithoutFeedback>
     );
   }

@@ -28,6 +28,7 @@ module.exports = {
     'comma-dangle': ['error', 'never'],
     'import/prefer-default-export': 'off',
     'object-curly-newline': 'off',
+    'react/jsx-filename-extension': 'off',
     'no-unused-vars': [
       'error',
       { vars: 'all', args: 'after-used', ignoreRestSiblings: false }

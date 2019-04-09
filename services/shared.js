@@ -1,3 +1,7 @@
+import React from 'react';
+import ActionSheet from 'react-native-actionsheet';
+import ImagePicker from 'react-native-image-crop-picker';
+
 export const ValidationTypes = {
   Error: 'error',
   Warning: 'warning',
@@ -65,6 +69,27 @@ export function alert(data) {
   alert(data.text);
 }
 
+export async function fromGallery(multiple = true) {
+  const images = await ImagePicker.openPicker({
+    multiple: true
+  });
+  const croppedImages = [];
+  for (let image of images) {
+    croppedImages.push(await cropPicture(image));
+  }
+  return croppedImages;
+}
+
+export function cropPicture(image) {
+  const width = image.width > 800 ? 800 : image.width;
+  return ImagePicker.openCropper({
+    path: image.path,
+    includeBase64: true,
+    width: width,
+    height: width
+  });
+}
+
 export async function profileImageHandler(source = 'gallery') {
   try {
     const image = await (source === 'gallery'
@@ -110,27 +135,6 @@ export async function profileImageHandler(source = 'gallery') {
   }
 }
 
-export function cropPicture(image) {
-  const width = image.width > 800 ? 800 : image.width;
-  return ImagePicker.openCropper({
-    path: image.path,
-    includeBase64: true,
-    width: width,
-    height: width
-  });
-}
-
-export async function fromGallery(multiple = true) {
-  const images = await ImagePicker.openPicker({
-    multiple: true
-  });
-  const croppedImages = [];
-  for (let image of images) {
-    croppedImages.push(await cropPicture(image));
-  }
-  return croppedImages;
-}
-
 export async function imageTakeFromCamera() {
   const camera = await ImagePicker.openCamera({ width: 800, height: 800 });
   return [await cropPicture(camera)];
@@ -160,7 +164,7 @@ export async function multiSourceImagePicker(source = 'gallery') {
       return alert({ text: translate('e_permission_missing') });
     }
     if (error && error.message && error.message.indexOf('cancelled') > -1) {
-      return;
+      return false;
     }
 
     alert({
