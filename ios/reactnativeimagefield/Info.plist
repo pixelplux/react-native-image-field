@@ -42,6 +42,10 @@
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+  <key>NSCameraUsageDescription</key>
+	<string>Please gain the permission to access camera.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Please gain the permission to upload images.</string>
 	<key>NSAppTransportSecurity</key>
 	<!--See http://ste.vn/2015/06/10/configuring-app-transport-security-ios-9-osx-10-11/ -->
 	<dict>
