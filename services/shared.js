@@ -1,12 +1,14 @@
 import React from 'react';
 import ActionSheet from 'react-native-actionsheet';
+import { Alert } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 
-export const ValidationTypes = {
+export const types = {
   Error: 'error',
   Warning: 'warning',
   None: 'none'
 };
+
 export const colors = {
   grayLight: 'rgb(239,239,239)',
   grayMedium: 'rgb(220,220,220)',
@@ -65,19 +67,8 @@ export function translate(key) {
   return key;
 }
 
-export function alert(data) {
-  alert(data.text);
-}
-
-export async function fromGallery(multiple = true) {
-  const images = await ImagePicker.openPicker({
-    multiple: true
-  });
-  const croppedImages = [];
-  for (let image of images) {
-    croppedImages.push(await cropPicture(image));
-  }
-  return croppedImages;
+export function alert(data = {}) {
+  Alert.alert(data.text);
 }
 
 export function cropPicture(image) {
@@ -85,54 +76,9 @@ export function cropPicture(image) {
   return ImagePicker.openCropper({
     path: image.path,
     includeBase64: true,
-    width: width,
+    width,
     height: width
   });
-}
-
-export async function profileImageHandler(source = 'gallery') {
-  try {
-    const image = await (source === 'gallery'
-      ? fromGallery(false)
-      : imageTakeFromCamera());
-
-    this.setState({ isUploading: true });
-
-    const image_upload_response = await UploadCropPickerImage(image[0]);
-
-    this.setState({ isUploading: false });
-    if (image_upload_response && image_upload_response.data) {
-      let picture = image_upload_response.data.items[0].schema.publicUrl;
-      this.setState({ isPosting: true });
-      const response = await ChangeProfilePicturePost({ picture });
-      this.setState({
-        response,
-        isPosting: false
-      });
-      const entities = asEntities(response);
-      if (!entities && response.error) {
-        return alert({
-          text: response.error.message || translate('something_went_wrong')
-        });
-      }
-      if (entities.length) {
-        alert({
-          text: translate('account_picture_successfully_updated')
-        });
-        SetUser({ ...entities[0].user }, entities[0].token);
-      }
-    }
-  } catch (error) {
-    this.setState({ isUploading: false, isPosting: false });
-    if (error && error.code === 'E_PERMISSION_MISSING') {
-      return alert({ text: translate('e_permission_missing') });
-    }
-    if (error && error.message && error.message.indexOf('cancelled') > -1) {
-      return;
-    }
-
-    alert(translate('cannot_upload_picture' + error.message));
-  }
 }
 
 export async function imageTakeFromCamera() {
@@ -140,7 +86,24 @@ export async function imageTakeFromCamera() {
   return [await cropPicture(camera)];
 }
 
-export async function multiSourceImagePicker(source = 'gallery') {
+export async function fromGallery(multiple = true) {
+  const images = await ImagePicker.openPicker({
+    multiple
+  });
+  const croppedImages = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const image of images) {
+    // eslint-disable-next-line no-await-in-loop
+    croppedImages.push(await cropPicture(image));
+  }
+  return croppedImages;
+}
+
+export async function multiSourceImagePicker(
+  source = 'gallery',
+  uploadHandler
+) {
+  const { uploading, images } = this.state;
   this.setState({ isUploading: true });
   try {
     const croppedImages = await (source === 'gallery'
@@ -148,14 +111,12 @@ export async function multiSourceImagePicker(source = 'gallery') {
       : imageTakeFromCamera());
     this.setState({ uploading: croppedImages.length });
     croppedImages.forEach(async image => {
-      const response = await UploadCropPickerImage(image);
-      if (response && response.data) {
-        const image = response.data.items[0].schema.publicUrl;
-        this.updateImages([...this.state.images, image]);
-        this.setState({
-          uploading: this.state.uploading - 1
-        });
-      }
+      const imageUrl = await uploadHandler(image);
+
+      this.updateImages([...images, imageUrl]);
+      this.setState({
+        uploading: uploading - 1
+      });
     });
     this.setState({ isUploading: false });
   } catch (error) {
@@ -171,6 +132,7 @@ export async function multiSourceImagePicker(source = 'gallery') {
       text: translate('cannot_upload_picture').replace('%msg%', error.message)
     });
   }
+  return false;
 }
 
 /* @description hostComponent is the place that the code should be ran on */
